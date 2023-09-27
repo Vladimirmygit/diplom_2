@@ -1,19 +1,21 @@
 import io.restassured.response.Response;
-
 import static io.restassured.RestAssured.*;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.is;
 
 public class LoginPage extends BaseTest {
     static String username = TestData.generateRandomUsername();
-    static String email = TestData.generateRandomEmail(username);
+    static String email = TestData.generateRandomEmail();
     static String password = TestData.generateRandomPassword();
 
     public String loginWithExistingUser() {
+        UserLoginData loginData = new UserLoginData();
+        loginData.setEmail(email);
+        loginData.setPassword(password);
+        loginData.setName(username);
+
         Response response = given()
                 .contentType("application/json")
-                .body("{\"email\": \"" + email  + "\", \"password\": \"" + password  + "\", \"name\": \"" + username  + "\"}")
+                .body(loginData)
                 .when()
                 .post("/api/auth/login")
                 .then()
@@ -27,9 +29,13 @@ public class LoginPage extends BaseTest {
     }
 
     public static void loginWithInvalidCredentials() {
+        UserLoginData loginData = new UserLoginData();
+        loginData.setEmail(email);
+        loginData.setPassword("wrongpassword");
+
         given()
                 .contentType("application/json")
-                .body("{\"email\": \"" + email +"\", \"password\": \"wrongpassword\"}")
+                .body(loginData)
                 .when()
                 .post("/api/auth/login")
                 .then()
